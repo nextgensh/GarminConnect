@@ -1,0 +1,21 @@
+#connectbutton {
+    border: solid;
+    border-radius: 0.25em;
+    padding: 0.5em;
+    font-size: 1.25em;
+    max-width: 8.5em;
+    background-color: #1E88E5;
+    color: #FAFAFA;
+    font-weight: bold;
+}
+
+#connectbutton:hover {
+    border: solid;
+    border-radius: 0.25em;
+    padding: 0.5em;
+    font-size: 1.25em;
+    max-width: 8.5em;
+    background-color: #1565C0;
+    color: #FAFAFA;
+    font-weight: bold;
+}
