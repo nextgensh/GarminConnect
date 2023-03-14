@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "postman-request": "^2.88.1-postman.32",
+    "querystring": "^0.2.1",
+    "requests": "^0.3.0"
+  }
+}

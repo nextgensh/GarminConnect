@@ -1,6 +1,7 @@
 import request from 'postman-request'
 import qs from 'querystring'
-
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 /*
  * @description : Method which gets the OAuth token from Garmin.
  * @params:
@@ -23,6 +24,7 @@ function getOAuthToken (url, oauth) {
                 const oauth_token_secret = req_data.oauth_token_secret
                 if(oauth_token){
                     resolve({
+                        'participantId': 'MDH-001',
                         'oauth_token' : oauth_token,
                         'oauth_token_secret' : oauth_token_secret
                     })
@@ -35,8 +37,11 @@ function getOAuthToken (url, oauth) {
 }
 
 export const handler = async(event, context) => {
+    const client = new DynamoDBClient({ region: "us-east-1" });
+    const ddbDocClient = DynamoDBDocumentClient.from(client);
     //Step 1 - Get Request Token
     //TODO: Move this to AWS Secrets Manager.
+    
     let oauth =
         { callback: '' ,
           consumer_key: 'a82ea843-9675-4410-8cc1-ecdc797fa664',
@@ -46,12 +51,28 @@ export const handler = async(event, context) => {
     let url = 'https://connectapi.garmin.com/oauth-service/oauth/request_token';
 
     const result = await getOAuthToken(url, oauth)
+    
+    if(result == "It did NOT work!"){
+        //Print Error To Website
+        let response = {
+            statusCode: 500,
+        };
+        return response;
+    }
+    
     const oauth_token = result['oauth_token']
     const oauth_token_secret = result['oauth_token_secret']
 
     /*
      * TODO: Add the oauth_token_secret to a dynamodb database for temp storage if it is needed for future use.
      */
+    
+    const dB = await ddbDocClient.send(
+      new PutCommand({
+        "TableName": "garminconnect",
+        "Item": result,
+      })
+    );
 
     let response = {
         statusCode: 303,
@@ -63,4 +84,7 @@ export const handler = async(event, context) => {
     return response
 };
 
-handler({'a':'b'})
+//let response = exports.handler({'a':'b'})
+let response = handler({'a':'b'})
+// passes this reponse to the calling server.
+console.log(response)

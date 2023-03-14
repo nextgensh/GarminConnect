@@ -1,8 +1,25 @@
 import request from 'postman-request'
 import qs from 'querystring'
+
+function getUserId (oauth, data) {
+    return new Promise(function (resolve, reject) {
+        request.get({url:'https://apis.garmin.com/wellness-api/rest/user/id', oauth:oauth, qs:data, json:true}, function (e, r, user) {
+            console.log(user)
+            //userID = user.userId
+            if(user){
+                resolve({
+                    'userid' : user.userId,
+                })
+            }
+            else{
+                reject("User ID did NOT work!")
+            }
+        })
+    })
+}
+
 export const handler = async(event) => {
     //Testing to get User ID
-    let userID
     const perm_data = ''
         , oauth =
             { consumer_key: 'a82ea843-9675-4410-8cc1-ecdc797fa664'
@@ -17,15 +34,13 @@ export const handler = async(event) => {
             , user_id: perm_data.user_id
             }
         ;
-    request.get({url:'https://apis.garmin.com/wellness-api/rest/user/id', oauth:oauth, qs:data, json:true}, function (e, r, user) {
-        console.log("User ID is "+user.userId)
-        //userID = user.userid
-    })
+    const printUserId = await getUserId(oauth, data)
+    const userID = printUserId['userid']
+    console.log(userID)
 
-    // TODO implement
     const response = {
         statusCode: 200,
-        body: "Success!"
+        body: "User ID is " + userID
     };
     return response;
 };
